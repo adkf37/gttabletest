@@ -1,0 +1,58 @@
+# Install and load the required packages
+install.packages(c("tidyverse", "gt"))
+library(tidyverse)
+library(gt)
+
+# Assuming your data is in a CSV file named 'data.csv'
+# Read in your data file
+data <- read.csv("data.csv")
+
+# Pivot the data with field columns as rows and the year column as values
+pivoted_data <- data %>%
+  pivot_longer(cols = starts_with("field"), names_to = "Field", values_to = "Value") %>%
+  group_by(Field, year) %>%
+  summarize(Value = sum(Value, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(Field, year)
+
+# Calculate subtotals for field 2, field 3, and field 4
+subtotals <- pivoted_data %>%
+  group_by(Field) %>%
+  summarize(Year = "Subtotal", Value = sum(Value, na.rm = TRUE))
+
+# Combine the pivoted data with subtotals
+final_data <- bind_rows(pivoted_data, subtotals)
+
+# Create the table and apply formatting
+formatted_table <- final_data %>%
+  gt() %>%
+  tab_header(
+    title = "Your Table Title",
+    subtitle = "Your Table Subtitle"
+  ) %>%
+  cols_label(
+    Field = "Field",
+    year = "Year",
+    Value = "Value"
+  ) %>%
+  fmt_number(
+    columns = vars(Value),
+    decimals = 2,
+    use_seps = TRUE
+  ) %>%
+  fmt_date(
+    columns = vars(year),
+    format = "Y"
+  ) %>%
+  tab_options(
+    row_group.background.color = "#f7f7f9"
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "lightgray"),
+    locations = cells_body(
+      columns = vars(Year),
+      rows = final_data$Year == "Subtotal"
+    )
+  )
+
+# Print the formatted table
+formatted_table
