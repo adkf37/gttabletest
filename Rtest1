@@ -1,0 +1,35 @@
+# Step 1: Install and load the required packages
+install.packages("gt")
+library(gt)
+
+# Assuming your data is in a CSV file named 'data.csv'
+# Step 2: Read in your data file
+data <- read.csv("data.csv")
+
+# Step 3: Use gt() to create the table and apply formatting
+formatted_table <- data %>%
+  gt() %>%
+  tab_header(
+    title = "Your Table Title",
+    subtitle = "Your Table Subtitle"
+  ) %>%
+  cols_label(
+    field_1 = "Field 1",
+    field_2 = "Field 2",
+    field_3 = "Field 3",
+    field_4 = "Field 4",
+    year = "Year",
+    value = "Value"
+  ) %>%
+  fmt_number(
+    columns = vars(value),
+    decimals = 2,
+    use_seps = TRUE
+  ) %>%
+  fmt_date(
+    columns = vars(year),
+    format = "Y"
+  )
+
+# Print the formatted table
+formatted_table
